@@ -7,8 +7,23 @@ const server = require('./app');
 chai.use(chaiHttp);
 
 describe('test Issues APIs', (done) => {
-
   before(() => {
+    nock('https://api.github.com')
+      .get('/search/issues?q=repo:Alapan/tic-tac-toe+type:issue+state:closed')
+      .reply(200, {
+        total_count: 20,
+        incomplete_results: false,
+        items: []
+      });
+
+    nock('https://api.github.com')
+      .get('/search/issues?q=repo:Alapan/tic-tac-toe+type:issue+state:open')
+      .reply(200, {
+        total_count: 10,
+        incomplete_results: false,
+        items: []
+      });
+
     nock('https://api.github.com')
       .get('/repos/Alapan/tic-tac-toe/issues')
       .reply(200, [
@@ -33,6 +48,13 @@ describe('test Issues APIs', (done) => {
 
   after(() => {
     nock.cleanAll();
+  });
+
+  it('tests the number of issues returned', async () => {
+    const result = await chai.request(server)
+      .get('/issues/Alapan/tic-tac-toe/count');
+    expect(result.status).to.equal(200);
+    expect(result.body.total_count).to.equal(30);
   });
 
   it('tests the data returned from the List repository issues API', async () => {

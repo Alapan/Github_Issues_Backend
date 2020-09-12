@@ -25,6 +25,26 @@ const corsOptions = {
 
 const octokit = new Octokit({ auth: process.env.PERSONAL_ACCESS_TOKEN });
 
+/* GET total number of issues for a repo */
+app.get('/issues/:owner/:repo/count', cors(corsOptions), (req, res) => {
+  const {repo} = req.params;
+  const {owner} = req.params;
+
+  Promise.all([
+    octokit.request('GET /search/issues', {
+      q: `repo:${owner}/${repo}+type:issue+state:closed`
+    }),
+    octokit.request('GET /search/issues', {
+      q: `repo:${owner}/${repo}+type:issue+state:open`
+    })
+  ]).then((response) => {
+    // Return total number of closed + open issues
+    console.log('CLOSED COUNT: ', response[0].data.total_count);
+    console.log('OPEN COUNT: ', response[1].data.total_count);
+    res.json({ total_count: (response[0].data.total_count + response[1].data.total_count) });
+  });
+});
+
 /* GET issues listing. */
 app.get('/issues/:owner/:repo', cors(corsOptions), (req, res) => {
   const {repo} = req.params;
@@ -33,7 +53,6 @@ app.get('/issues/:owner/:repo', cors(corsOptions), (req, res) => {
     .then((response) => {
       res.json(response.data);
     })
-    .catch((err) => res.send(err.message));
 });
 
 /* GET events for an issue */
@@ -49,7 +68,6 @@ app.get('/issues/:owner/:repo/:issue_number/events', cors(corsOptions), (req, re
     .then((response) => {
       res.json(response.data);
     })
-    .catch((err) => res.send(err.message));
 });
 
 /* GET details for a particular event */
@@ -64,8 +82,7 @@ app.get('/issues/:owner/:repo/events/:event_id', cors(corsOptions), (req, res) =
   })
     .then((response) => {
       res.json(response.data);
-    })
-    .catch((err) => res.send(err.message));
+    });
 });
 
 // catch 404 and forward to error handler
@@ -83,7 +100,6 @@ app.use(function(err, req, res, next) {
   res.status(err.status || 500);
   res.render('error');
 });
-
 
 if (!module.parent) {
   app.listen(PORT, () => {
