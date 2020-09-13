@@ -25,7 +25,7 @@ describe('test Issues APIs', (done) => {
       });
 
     nock('https://api.github.com')
-      .get('/repos/Alapan/tic-tac-toe/issues')
+      .get('/repos/Alapan/tic-tac-toe/issues?page=1&per_page=30')
       .reply(200, [
         { num: 1 },
         { num: 2 }
@@ -37,13 +37,6 @@ describe('test Issues APIs', (done) => {
         { name: 'open event'},
         { name: 'update event'}
       ]);
-
-    nock('https://api.github.com')
-      .get('/repos/Alapan/tic-tac-toe/issues/events/3417931151')
-      .reply(200, {
-        id: 3417931151,
-        url:'https://api.github.com/repos/Alapan/tic-tac-toe/issues/events/3417931151'
-      });
   });
 
   after(() => {
@@ -59,22 +52,15 @@ describe('test Issues APIs', (done) => {
 
   it('tests the data returned from the List repository issues API', async () => {
     const result = await chai.request(server)
-      .get('/issues/Alapan/tic-tac-toe');
+      .get('/issues/Alapan/tic-tac-toe/1/30');
     expect(result.status).to.equal(200);
     expect(result.body.length).to.equal(2);
   });
 
   it('lists the events for a particular issue', async () => {
     const result = await chai.request(server)
-      .get('/issues/Alapan/tic-tac-toe/3/events');
+      .get('/events/Alapan/tic-tac-toe/3');
     expect(result.status).to.equal(200);
     expect(result.body.length).to.equal(2);
-  });
-
-  it('tests details of a particular event', async() => {
-    const result = await chai.request(server)
-      .get('/issues/Alapan/tic-tac-toe/events/3417931151');
-    expect(result.status).to.equal(200);
-    expect(result.body.id).to.equal(3417931151);
   });
 });

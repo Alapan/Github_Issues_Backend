@@ -39,24 +39,26 @@ app.get('/issues/:owner/:repo/count', cors(corsOptions), (req, res) => {
     })
   ]).then((response) => {
     // Return total number of closed + open issues
-    console.log('CLOSED COUNT: ', response[0].data.total_count);
-    console.log('OPEN COUNT: ', response[1].data.total_count);
     res.json({ total_count: (response[0].data.total_count + response[1].data.total_count) });
   });
 });
 
 /* GET issues listing. */
-app.get('/issues/:owner/:repo', cors(corsOptions), (req, res) => {
-  const {repo} = req.params;
-  const {owner} = req.params;
-  octokit.request('GET /repos/{owner}/{repo}/issues', {owner, repo})
+app.get('/issues/:owner/:repo/:page/:per_page', cors(corsOptions), (req, res) => {
+  const {
+    repo,
+    owner,
+    page,
+    per_page
+  } = req.params;
+  octokit.request(`GET /repos/${owner}/${repo}/issues`, {page, per_page})
     .then((response) => {
       res.json(response.data);
-    })
+    });
 });
 
 /* GET events for an issue */
-app.get('/issues/:owner/:repo/:issue_number/events', cors(corsOptions), (req, res) => {
+app.get('/events/:owner/:repo/:issue_number', cors(corsOptions), (req, res) => {
   const {repo} = req.params;
   const {owner} = req.params;
   const {issue_number} = req.params;
@@ -64,21 +66,6 @@ app.get('/issues/:owner/:repo/:issue_number/events', cors(corsOptions), (req, re
     owner,
     repo,
     issue_number
-  })
-    .then((response) => {
-      res.json(response.data);
-    })
-});
-
-/* GET details for a particular event */
-app.get('/issues/:owner/:repo/events/:event_id', cors(corsOptions), (req, res) => {
-  const {repo} = req.params;
-  const {owner} = req.params;
-  const {event_id} = req.params;
-  octokit.request('GET /repos/{owner}/{repo}/issues/events/{event_id}', {
-    owner,
-    repo,
-    event_id
   })
     .then((response) => {
       res.json(response.data);
