@@ -4,10 +4,10 @@ const express = require('express');
 const path = require('path');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
+const { Octokit } = require('@octokit/core');
 require('dotenv').config();
 
 const app = express();
-const { Octokit } = require('@octokit/core');
 const PORT = 8000;
 
 // view engine setup
@@ -20,23 +20,23 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 
 const corsOptions = {
-  origin: 'http://localhost:3000'
+  origin: 'http://localhost:3000',
 };
 
 const octokit = new Octokit({ auth: process.env.PERSONAL_ACCESS_TOKEN });
 
 /* GET total number of issues for a repo */
 app.get('/issues/:owner/:repo/count', cors(corsOptions), (req, res) => {
-  const {repo} = req.params;
-  const {owner} = req.params;
+  const { repo } = req.params;
+  const { owner } = req.params;
 
   Promise.all([
     octokit.request('GET /search/issues', {
-      q: `repo:${owner}/${repo}+type:issue+state:closed`
+      q: `repo:${owner}/${repo}+type:issue+state:closed`,
     }),
     octokit.request('GET /search/issues', {
-      q: `repo:${owner}/${repo}+type:issue+state:open`
-    })
+      q: `repo:${owner}/${repo}+type:issue+state:open`,
+    }),
   ]).then((response) => {
     // Return total number of closed + open issues
     res.json({ total_count: (response[0].data.total_count + response[1].data.total_count) });
@@ -44,28 +44,28 @@ app.get('/issues/:owner/:repo/count', cors(corsOptions), (req, res) => {
 });
 
 /* GET issues listing. */
-app.get('/issues/:owner/:repo/:page/:per_page', cors(corsOptions), (req, res) => {
+app.get('/issues/:owner/:repo/:page/:perPage', cors(corsOptions), (req, res) => {
   const {
     repo,
     owner,
     page,
-    per_page
+    perPage,
   } = req.params;
-  octokit.request(`GET /repos/${owner}/${repo}/issues`, {page, per_page})
+  octokit.request(`GET /repos/${owner}/${repo}/issues`, { page, per_page: perPage })
     .then((response) => {
       res.json(response.data);
     });
 });
 
 /* GET events for an issue */
-app.get('/events/:owner/:repo/:issue_number', cors(corsOptions), (req, res) => {
-  const {repo} = req.params;
-  const {owner} = req.params;
-  const {issue_number} = req.params;
+app.get('/events/:owner/:repo/:issueNumber', cors(corsOptions), (req, res) => {
+  const { repo } = req.params;
+  const { owner } = req.params;
+  const { issueNumber } = req.params;
   octokit.request('GET /repos/{owner}/{repo}/issues/{issue_number}/events', {
     owner,
     repo,
-    issue_number
+    issue_number: issueNumber,
   })
     .then((response) => {
       res.json(response.data);
@@ -73,12 +73,12 @@ app.get('/events/:owner/:repo/:issue_number', cors(corsOptions), (req, res) => {
 });
 
 // catch 404 and forward to error handler
-app.use(function(req, res, next) {
+app.use((req, res, next) => {
   next(createError(404));
 });
 
 // error handler
-app.use(function(err, req, res, next) {
+app.use((err, req, res) => {
   // set locals, only providing error in development
   res.locals.message = err.message;
   res.locals.error = req.app.get('env') === 'development' ? err : {};

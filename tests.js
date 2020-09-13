@@ -1,19 +1,19 @@
 const chai = require('chai');
 const chaiHttp = require('chai-http');
-const expect = chai.expect;
 const nock = require('nock');
 const server = require('./app');
 
+const { expect } = chai;
 chai.use(chaiHttp);
 
-describe('test Issues APIs', (done) => {
+describe('test Issues APIs', () => {
   before(() => {
     nock('https://api.github.com')
       .get('/search/issues?q=repo:Alapan/tic-tac-toe+type:issue+state:closed')
       .reply(200, {
         total_count: 20,
         incomplete_results: false,
-        items: []
+        items: [],
       });
 
     nock('https://api.github.com')
@@ -21,21 +21,21 @@ describe('test Issues APIs', (done) => {
       .reply(200, {
         total_count: 10,
         incomplete_results: false,
-        items: []
+        items: [],
       });
 
     nock('https://api.github.com')
       .get('/repos/Alapan/tic-tac-toe/issues?page=1&per_page=30')
       .reply(200, [
         { num: 1 },
-        { num: 2 }
+        { num: 2 },
       ]);
 
     nock('https://api.github.com')
       .get('/repos/Alapan/tic-tac-toe/issues/3/events')
       .reply(200, [
-        { name: 'open event'},
-        { name: 'update event'}
+        { name: 'open event' },
+        { name: 'update event' },
       ]);
   });
 
