@@ -5,13 +5,13 @@ const path = require('path');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 const { Octokit } = require('@octokit/core');
-require('dotenv').config();
 
 const app = express();
 const PORT = 8000;
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
+
 app.set('view engine', 'pug');
 
 app.use(logger('dev'));
@@ -23,8 +23,7 @@ const corsOptions = {
   origin: 'http://localhost:3000',
 };
 
-const octokit = new Octokit({ auth: process.env.PERSONAL_ACCESS_TOKEN });
-
+const octokit = new Octokit();
 /* GET total number of issues for a repo */
 app.get('/issues/:owner/:repo/count', cors(corsOptions), (req, res) => {
   const { repo } = req.params;
