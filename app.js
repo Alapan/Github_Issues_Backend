@@ -7,7 +7,7 @@ const logger = require('morgan');
 const { Octokit } = require('@octokit/core');
 
 const app = express();
-const PORT = 8000;
+const PORT = process.env.port || 8000;
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
