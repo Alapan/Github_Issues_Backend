@@ -5,9 +5,10 @@ const path = require('path');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 const { Octokit } = require('@octokit/core');
+const FRONTEND_DOMAIN = require('./constants');
 
 const app = express();
-const PORT = process.env.port || 8000;
+const PORT = process.env.PORT || 8000;
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -20,8 +21,12 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 
 const corsOptions = {
-  origin: 'http://localhost:3000',
+  origin: FRONTEND_DOMAIN,
 };
+
+app.get('/', (req, res) => {
+  res.sendStatus(200);
+});
 
 const octokit = new Octokit();
 /* GET total number of issues for a repo */
